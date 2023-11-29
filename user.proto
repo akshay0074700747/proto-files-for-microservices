@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "./pb";
+
+message AddUserRequest {
+    string name = 1;
+}
+
+message UserResponce {
+    uint32 id = 1;
+    string name = 2;
+}
+
+message UserRequest {
+    uint32 id = 1;
+}
+
+service UserService {
+    rpc AddUser(AddUserRequest)returns(UserResponce);
+    rpc GetUser(UserRequest)returns(UserResponce);
+}
+
