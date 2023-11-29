@@ -1,4 +1,4 @@
-module github.com/akshay0074700747/proto-files-for-microservices.git
+module github.com/akshay0074700747/proto-files-for-microservices
 
 go 1.21.3
 
