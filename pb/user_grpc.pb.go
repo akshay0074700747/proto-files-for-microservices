@@ -8,6 +8,7 @@ package pb
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -19,8 +20,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	UserService_AddUser_FullMethodName = "/user.UserService/AddUser"
-	UserService_GetUser_FullMethodName = "/user.UserService/GetUser"
+	UserService_AddUser_FullMethodName             = "/user.UserService/AddUser"
+	UserService_GetUser_FullMethodName             = "/user.UserService/GetUser"
+	UserService_GetAllUsersResponce_FullMethodName = "/user.UserService/GetAllUsersResponce"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -29,6 +31,7 @@ const (
 type UserServiceClient interface {
 	AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*UserResponce, error)
 	GetUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponce, error)
+	GetAllUsersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error)
 }
 
 type userServiceClient struct {
@@ -57,12 +60,22 @@ func (c *userServiceClient) GetUser(ctx context.Context, in *UserRequest, opts .
 	return out, nil
 }
 
+func (c *userServiceClient) GetAllUsersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error) {
+	out := new(AllUsersResponce)
+	err := c.cc.Invoke(ctx, UserService_GetAllUsersResponce_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
 	AddUser(context.Context, *AddUserRequest) (*UserResponce, error)
 	GetUser(context.Context, *UserRequest) (*UserResponce, error)
+	GetAllUsersResponce(context.Context, *empty.Empty) (*AllUsersResponce, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -75,6 +88,9 @@ func (UnimplementedUserServiceServer) AddUser(context.Context, *AddUserRequest) 
 }
 func (UnimplementedUserServiceServer) GetUser(context.Context, *UserRequest) (*UserResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+}
+func (UnimplementedUserServiceServer) GetAllUsersResponce(context.Context, *empty.Empty) (*AllUsersResponce, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllUsersResponce not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -125,6 +141,24 @@ func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetAllUsersResponce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetAllUsersResponce(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetAllUsersResponce_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetAllUsersResponce(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,6 +173,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUser",
 			Handler:    _UserService_GetUser_Handler,
+		},
+		{
+			MethodName: "GetAllUsersResponce",
+			Handler:    _UserService_GetAllUsersResponce_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
