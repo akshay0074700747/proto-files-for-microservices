@@ -29,8 +29,18 @@ message GetOrdersByUserResponce {
     repeated AddOrderResponce orders = 1;
 }
 
+message GetOrdersWithoutUser {
+    repeated OrdersOnly orders = 1;
+}
+
+message OrdersOnly {
+    uint32 id = 1;
+    int32 price = 2;
+    string status = 3;
+}
+
 service OrderService {
     rpc AddOrder(AddOrderRequest)returns(AddOrderResponce);
-    rpc GetOrdersByUser(GetOrdersByUserRequest)returns(GetOrdersByUserResponce);
+    rpc GetOrdersByUser(GetOrdersByUserRequest)returns(GetOrdersWithoutUser);
     rpc GetAllOrdersResponce(google.protobuf.Empty)returns(GetOrdersByUserResponce);
 }

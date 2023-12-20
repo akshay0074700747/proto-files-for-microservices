@@ -30,7 +30,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrderServiceClient interface {
 	AddOrder(ctx context.Context, in *AddOrderRequest, opts ...grpc.CallOption) (*AddOrderResponce, error)
-	GetOrdersByUser(ctx context.Context, in *GetOrdersByUserRequest, opts ...grpc.CallOption) (*GetOrdersByUserResponce, error)
+	GetOrdersByUser(ctx context.Context, in *GetOrdersByUserRequest, opts ...grpc.CallOption) (*GetOrdersWithoutUser, error)
 	GetAllOrdersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetOrdersByUserResponce, error)
 }
 
@@ -51,8 +51,8 @@ func (c *orderServiceClient) AddOrder(ctx context.Context, in *AddOrderRequest, 
 	return out, nil
 }
 
-func (c *orderServiceClient) GetOrdersByUser(ctx context.Context, in *GetOrdersByUserRequest, opts ...grpc.CallOption) (*GetOrdersByUserResponce, error) {
-	out := new(GetOrdersByUserResponce)
+func (c *orderServiceClient) GetOrdersByUser(ctx context.Context, in *GetOrdersByUserRequest, opts ...grpc.CallOption) (*GetOrdersWithoutUser, error) {
+	out := new(GetOrdersWithoutUser)
 	err := c.cc.Invoke(ctx, OrderService_GetOrdersByUser_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (c *orderServiceClient) GetAllOrdersResponce(ctx context.Context, in *empty
 // for forward compatibility
 type OrderServiceServer interface {
 	AddOrder(context.Context, *AddOrderRequest) (*AddOrderResponce, error)
-	GetOrdersByUser(context.Context, *GetOrdersByUserRequest) (*GetOrdersByUserResponce, error)
+	GetOrdersByUser(context.Context, *GetOrdersByUserRequest) (*GetOrdersWithoutUser, error)
 	GetAllOrdersResponce(context.Context, *empty.Empty) (*GetOrdersByUserResponce, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
@@ -86,7 +86,7 @@ type UnimplementedOrderServiceServer struct {
 func (UnimplementedOrderServiceServer) AddOrder(context.Context, *AddOrderRequest) (*AddOrderResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddOrder not implemented")
 }
-func (UnimplementedOrderServiceServer) GetOrdersByUser(context.Context, *GetOrdersByUserRequest) (*GetOrdersByUserResponce, error) {
+func (UnimplementedOrderServiceServer) GetOrdersByUser(context.Context, *GetOrdersByUserRequest) (*GetOrdersWithoutUser, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrdersByUser not implemented")
 }
 func (UnimplementedOrderServiceServer) GetAllOrdersResponce(context.Context, *empty.Empty) (*GetOrdersByUserResponce, error) {
