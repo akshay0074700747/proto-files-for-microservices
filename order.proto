@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package order;
+
+option go_package = "./pb";
+
+import "google/protobuf/empty.proto";
+
+import "user.proto";
+
+message AddOrderRequest {
+    user.UserResponce user = 1;
+    int32 price = 2;
+    string status = 3;
+}
+
+message AddOrderResponce {
+    uint32 id = 1;
+    user.UserResponce user = 2;
+    int32 price = 3;
+    string status = 4;
+}
+
+message GetOrdersByUserRequest {
+    uint32 user_id = 1;
+}
+
+message GetOrdersByUserResponce {
+    repeated AddOrderResponce orders = 1;
+}
+
+service OrderService {
+    rpc AddOrder(AddOrderRequest)returns(AddOrderResponce);
+    rpc GetOrdersByUser(GetOrdersByUserRequest)returns(GetOrdersByUserResponce);
+    rpc GetAllOrdersResponce(google.protobuf.Empty)returns(GetOrdersByUserResponce);
+}
