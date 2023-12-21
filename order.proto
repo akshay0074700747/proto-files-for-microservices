@@ -8,17 +8,18 @@ import "google/protobuf/empty.proto";
 
 import "user.proto";
 
+import "product.proto";
+
 message AddOrderRequest {
     uint32 user_id = 1;
-    int32 price = 2;
-    string status = 3;
+    repeated int32 productIDs = 2;
 }
 
 message AddOrderResponce {
     uint32 id = 1;
     user.UserResponce user = 2;
     int32 price = 3;
-    string status = 4;
+    repeated product.AddProductResponce products = 4;
 }
 
 message GetOrdersByUserRequest {
@@ -37,6 +38,7 @@ message OrdersOnly {
     uint32 id = 1;
     int32 price = 2;
     string status = 3;
+    repeated product.AddProductResponce products = 4;
 }
 
 service OrderService {
