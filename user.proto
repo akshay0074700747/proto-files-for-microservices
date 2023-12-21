@@ -28,4 +28,3 @@ service UserService {
     rpc GetUser(UserRequest)returns(UserResponce);
     rpc GetAllUsersResponce(google.protobuf.Empty)returns(AllUsersResponce);
 }
-
