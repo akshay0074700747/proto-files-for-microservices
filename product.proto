@@ -9,16 +9,14 @@ import "google/protobuf/empty.proto";
 message AddProductRequest {
     string name = 1;
     int32 price = 2;
-    string status = 3;
-    int32 stock = 4;
+    int32 stock = 3;
 }
 
 message AddProductResponce {
     uint32 id = 1;
     string name = 2;
     int32 price = 3;
-    string status = 4;
-    int32 stock = 5;
+    int32 stock = 4;
 }
 
 message UpdateStockRequest {
