@@ -6,15 +6,26 @@ option go_package = "./pb";
 
 import "google/protobuf/empty.proto";
 
-message AddUserRequest {
+message SignupUserRequest {
     string name = 1;
-    bool isAdmin = 2;
+    string email = 2;
+    string mobile = 3;
+    string password = 4;
+    bool isAdmin = 5;
 }
 
 message UserResponce {
     uint32 id = 1;
     string name = 2;
-    bool isAdmin = 3;
+    string email = 3;
+    string mobile = 4;
+    bool isAdmin = 5;
+    bool isSuAdmin = 6;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
 }
 
 message UserRequest {
@@ -26,7 +37,10 @@ message AllUsersResponce {
 }
 
 service UserService {
-    rpc AddUser(AddUserRequest)returns(UserResponce);
+    rpc SignupUser(SignupUserRequest)returns(UserResponce);
+    rpc LoginUser(LoginRequest)returns(UserResponce);
     rpc GetUser(UserRequest)returns(UserResponce);
     rpc GetAllUsersResponce(google.protobuf.Empty)returns(AllUsersResponce);
+    rpc GetAllAdminsResponce(google.protobuf.Empty)returns(AllUsersResponce);
+    rpc AddAdmin(SignupUserRequest)returns(UserResponce);
 }

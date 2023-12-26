@@ -20,18 +20,24 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	UserService_AddUser_FullMethodName             = "/user.UserService/AddUser"
-	UserService_GetUser_FullMethodName             = "/user.UserService/GetUser"
-	UserService_GetAllUsersResponce_FullMethodName = "/user.UserService/GetAllUsersResponce"
+	UserService_SignupUser_FullMethodName           = "/user.UserService/SignupUser"
+	UserService_LoginUser_FullMethodName            = "/user.UserService/LoginUser"
+	UserService_GetUser_FullMethodName              = "/user.UserService/GetUser"
+	UserService_GetAllUsersResponce_FullMethodName  = "/user.UserService/GetAllUsersResponce"
+	UserService_GetAllAdminsResponce_FullMethodName = "/user.UserService/GetAllAdminsResponce"
+	UserService_AddAdmin_FullMethodName             = "/user.UserService/AddAdmin"
 )
 
 // UserServiceClient is the client API for UserService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*UserResponce, error)
+	SignupUser(ctx context.Context, in *SignupUserRequest, opts ...grpc.CallOption) (*UserResponce, error)
+	LoginUser(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*UserResponce, error)
 	GetUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponce, error)
 	GetAllUsersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error)
+	GetAllAdminsResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error)
+	AddAdmin(ctx context.Context, in *SignupUserRequest, opts ...grpc.CallOption) (*UserResponce, error)
 }
 
 type userServiceClient struct {
@@ -42,9 +48,18 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*UserResponce, error) {
+func (c *userServiceClient) SignupUser(ctx context.Context, in *SignupUserRequest, opts ...grpc.CallOption) (*UserResponce, error) {
 	out := new(UserResponce)
-	err := c.cc.Invoke(ctx, UserService_AddUser_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, UserService_SignupUser_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) LoginUser(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*UserResponce, error) {
+	out := new(UserResponce)
+	err := c.cc.Invoke(ctx, UserService_LoginUser_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,13 +84,34 @@ func (c *userServiceClient) GetAllUsersResponce(ctx context.Context, in *empty.E
 	return out, nil
 }
 
+func (c *userServiceClient) GetAllAdminsResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error) {
+	out := new(AllUsersResponce)
+	err := c.cc.Invoke(ctx, UserService_GetAllAdminsResponce_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) AddAdmin(ctx context.Context, in *SignupUserRequest, opts ...grpc.CallOption) (*UserResponce, error) {
+	out := new(UserResponce)
+	err := c.cc.Invoke(ctx, UserService_AddAdmin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
-	AddUser(context.Context, *AddUserRequest) (*UserResponce, error)
+	SignupUser(context.Context, *SignupUserRequest) (*UserResponce, error)
+	LoginUser(context.Context, *LoginRequest) (*UserResponce, error)
 	GetUser(context.Context, *UserRequest) (*UserResponce, error)
 	GetAllUsersResponce(context.Context, *empty.Empty) (*AllUsersResponce, error)
+	GetAllAdminsResponce(context.Context, *empty.Empty) (*AllUsersResponce, error)
+	AddAdmin(context.Context, *SignupUserRequest) (*UserResponce, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -83,14 +119,23 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
-func (UnimplementedUserServiceServer) AddUser(context.Context, *AddUserRequest) (*UserResponce, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddUser not implemented")
+func (UnimplementedUserServiceServer) SignupUser(context.Context, *SignupUserRequest) (*UserResponce, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SignupUser not implemented")
+}
+func (UnimplementedUserServiceServer) LoginUser(context.Context, *LoginRequest) (*UserResponce, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoginUser not implemented")
 }
 func (UnimplementedUserServiceServer) GetUser(context.Context, *UserRequest) (*UserResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedUserServiceServer) GetAllUsersResponce(context.Context, *empty.Empty) (*AllUsersResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllUsersResponce not implemented")
+}
+func (UnimplementedUserServiceServer) GetAllAdminsResponce(context.Context, *empty.Empty) (*AllUsersResponce, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllAdminsResponce not implemented")
+}
+func (UnimplementedUserServiceServer) AddAdmin(context.Context, *SignupUserRequest) (*UserResponce, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddAdmin not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -105,20 +150,38 @@ func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 	s.RegisterService(&UserService_ServiceDesc, srv)
 }
 
-func _UserService_AddUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddUserRequest)
+func _UserService_SignupUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignupUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).AddUser(ctx, in)
+		return srv.(UserServiceServer).SignupUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_AddUser_FullMethodName,
+		FullMethod: UserService_SignupUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).AddUser(ctx, req.(*AddUserRequest))
+		return srv.(UserServiceServer).SignupUser(ctx, req.(*SignupUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_LoginUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).LoginUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_LoginUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).LoginUser(ctx, req.(*LoginRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -159,6 +222,42 @@ func _UserService_GetAllUsersResponce_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetAllAdminsResponce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetAllAdminsResponce(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetAllAdminsResponce_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetAllAdminsResponce(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_AddAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignupUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).AddAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_AddAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).AddAdmin(ctx, req.(*SignupUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -167,8 +266,12 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "AddUser",
-			Handler:    _UserService_AddUser_Handler,
+			MethodName: "SignupUser",
+			Handler:    _UserService_SignupUser_Handler,
+		},
+		{
+			MethodName: "LoginUser",
+			Handler:    _UserService_LoginUser_Handler,
 		},
 		{
 			MethodName: "GetUser",
@@ -177,6 +280,14 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllUsersResponce",
 			Handler:    _UserService_GetAllUsersResponce_Handler,
+		},
+		{
+			MethodName: "GetAllAdminsResponce",
+			Handler:    _UserService_GetAllAdminsResponce_Handler,
+		},
+		{
+			MethodName: "AddAdmin",
+			Handler:    _UserService_AddAdmin_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
