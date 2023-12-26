@@ -23,6 +23,8 @@ const (
 	UserService_SignupUser_FullMethodName           = "/user.UserService/SignupUser"
 	UserService_LoginUser_FullMethodName            = "/user.UserService/LoginUser"
 	UserService_GetUser_FullMethodName              = "/user.UserService/GetUser"
+	UserService_GetAdmin_FullMethodName             = "/user.UserService/GetAdmin"
+	UserService_GetSuAdmin_FullMethodName           = "/user.UserService/GetSuAdmin"
 	UserService_GetAllUsersResponce_FullMethodName  = "/user.UserService/GetAllUsersResponce"
 	UserService_GetAllAdminsResponce_FullMethodName = "/user.UserService/GetAllAdminsResponce"
 	UserService_AddAdmin_FullMethodName             = "/user.UserService/AddAdmin"
@@ -35,6 +37,8 @@ type UserServiceClient interface {
 	SignupUser(ctx context.Context, in *SignupUserRequest, opts ...grpc.CallOption) (*UserResponce, error)
 	LoginUser(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*UserResponce, error)
 	GetUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponce, error)
+	GetAdmin(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponce, error)
+	GetSuAdmin(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponce, error)
 	GetAllUsersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error)
 	GetAllAdminsResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error)
 	AddAdmin(ctx context.Context, in *SignupUserRequest, opts ...grpc.CallOption) (*UserResponce, error)
@@ -75,6 +79,24 @@ func (c *userServiceClient) GetUser(ctx context.Context, in *UserRequest, opts .
 	return out, nil
 }
 
+func (c *userServiceClient) GetAdmin(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponce, error) {
+	out := new(UserResponce)
+	err := c.cc.Invoke(ctx, UserService_GetAdmin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetSuAdmin(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponce, error) {
+	out := new(UserResponce)
+	err := c.cc.Invoke(ctx, UserService_GetSuAdmin_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) GetAllUsersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error) {
 	out := new(AllUsersResponce)
 	err := c.cc.Invoke(ctx, UserService_GetAllUsersResponce_FullMethodName, in, out, opts...)
@@ -109,6 +131,8 @@ type UserServiceServer interface {
 	SignupUser(context.Context, *SignupUserRequest) (*UserResponce, error)
 	LoginUser(context.Context, *LoginRequest) (*UserResponce, error)
 	GetUser(context.Context, *UserRequest) (*UserResponce, error)
+	GetAdmin(context.Context, *UserRequest) (*UserResponce, error)
+	GetSuAdmin(context.Context, *UserRequest) (*UserResponce, error)
 	GetAllUsersResponce(context.Context, *empty.Empty) (*AllUsersResponce, error)
 	GetAllAdminsResponce(context.Context, *empty.Empty) (*AllUsersResponce, error)
 	AddAdmin(context.Context, *SignupUserRequest) (*UserResponce, error)
@@ -127,6 +151,12 @@ func (UnimplementedUserServiceServer) LoginUser(context.Context, *LoginRequest) 
 }
 func (UnimplementedUserServiceServer) GetUser(context.Context, *UserRequest) (*UserResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+}
+func (UnimplementedUserServiceServer) GetAdmin(context.Context, *UserRequest) (*UserResponce, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAdmin not implemented")
+}
+func (UnimplementedUserServiceServer) GetSuAdmin(context.Context, *UserRequest) (*UserResponce, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSuAdmin not implemented")
 }
 func (UnimplementedUserServiceServer) GetAllUsersResponce(context.Context, *empty.Empty) (*AllUsersResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllUsersResponce not implemented")
@@ -204,6 +234,42 @@ func _UserService_GetUser_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetAdmin(ctx, req.(*UserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetSuAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetSuAdmin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetSuAdmin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetSuAdmin(ctx, req.(*UserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_GetAllUsersResponce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(empty.Empty)
 	if err := dec(in); err != nil {
@@ -276,6 +342,14 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUser",
 			Handler:    _UserService_GetUser_Handler,
+		},
+		{
+			MethodName: "GetAdmin",
+			Handler:    _UserService_GetAdmin_Handler,
+		},
+		{
+			MethodName: "GetSuAdmin",
+			Handler:    _UserService_GetSuAdmin_Handler,
 		},
 		{
 			MethodName: "GetAllUsersResponce",

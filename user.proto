@@ -40,6 +40,8 @@ service UserService {
     rpc SignupUser(SignupUserRequest)returns(UserResponce);
     rpc LoginUser(LoginRequest)returns(UserResponce);
     rpc GetUser(UserRequest)returns(UserResponce);
+    rpc GetAdmin(UserRequest)returns(UserResponce);
+    rpc GetSuAdmin(UserRequest)returns(UserResponce);
     rpc GetAllUsersResponce(google.protobuf.Empty)returns(AllUsersResponce);
     rpc GetAllAdminsResponce(google.protobuf.Empty)returns(AllUsersResponce);
     rpc AddAdmin(SignupUserRequest)returns(UserResponce);
