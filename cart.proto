@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package cart;
+
+option go_package = "./pb";
+
+import "product.proto";
+
+message CartRequest {
+    uint32 user_id = 1;
+}
+
+message CartResponce {
+    uint32 cart_id = 1;
+    uint32 user_id = 2;
+    bool is_empty = 3;
+}
+
+message AddtoCartRequest {
+    uint32 user_id = 1;
+    uint32 product_id = 2;
+    int32 quantity = 3;
+}
+
+message AddtoCartResponce {
+    product.AddProductResponce product = 1;
+    int32 quantity = 2;
+}
+
+message GetCartResponce {
+    uint32 cart_id = 1;
+    repeated AddtoCartResponce products = 2;
+}
+
+message ChangeQtyRequest {
+    uint32 user_id = 1;
+    uint32 product_id = 2;
+    int32 quantity = 3;
+    bool is_increase = 4;
+}
+
+service CartService {
+    rpc CreateCart(CartRequest)returns(CartResponce);
+    rpc GetCart(CartRequest)returns(GetCartResponce);
+    rpc AddtoCart(AddtoCartRequest)returns(AddtoCartResponce);
+    rpc DeleteCartItem(AddtoCartRequest)returns(GetCartResponce);
+    rpc TruncateCart(CartRequest)returns(CartResponce);
+    rpc ChangeQty(ChangeQtyRequest)returns(AddtoCartResponce);
+    rpc TrasferWishlist(CartRequest)returns(GetCartResponce);
+}

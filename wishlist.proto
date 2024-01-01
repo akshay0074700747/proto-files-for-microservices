@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package wishlist;
+
+option go_package = "./pb";
+
+import "product.proto";
+
+message WishlistRequest {
+    uint32 user_id = 1;
+}
+
+message WishlistResponce {
+    uint32 wishlist_id = 1;
+    uint32 user_id = 2;
+    bool is_empty = 3;
+}
+
+message AddtoWishlistRequest {
+    uint32 user_id = 1;
+    uint32 product_id = 2;
+}
+
+message GetWishlistResponce {
+    uint32 wishlist_id = 1;
+    repeated product.AddProductResponce products = 2;
+}
+
+service WishlistService {
+    rpc CreateWishlist(WishlistRequest)returns(WishlistResponce);
+    rpc GetWishlist(WishlistRequest)returns(GetWishlistResponce);
+    rpc AddtoWishlist(AddtoWishlistRequest)returns(product.AddProductResponce);
+    rpc DeleteWishlistItem(AddtoWishlistRequest)returns(GetWishlistResponce);
+    rpc TruncateWishlist(WishlistRequest)returns(WishlistResponce);
+}
