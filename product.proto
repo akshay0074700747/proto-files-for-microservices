@@ -33,9 +33,14 @@ message GetProductByID {
     uint32 id = 1;
 }
 
+message ArrayofProductsRequest {
+    repeated uint32 id = 1;
+}
+
 service ProductService {
     rpc AddProducts(AddProductRequest)returns(AddProductResponce);
     rpc GetProduct(GetProductByID)returns(AddProductResponce);
     rpc GetAllProducts(google.protobuf.Empty)returns(GetAllProductsResponce);
     rpc UpdateStock(UpdateStockRequest)returns(AddProductResponce);
+    rpc GetArrayofProducts(ArrayofProductsRequest)returns(GetAllProductsResponce);
 }
