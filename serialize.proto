@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package serializee;
+
+option go_package = "./pb";
+
+message Category {
+    uint32 id = 1;
+    string name = 2;
+}
+message Name {
+    string name = 1;
+}
+
+message Id {
+    uint32 id = 1;
+}
