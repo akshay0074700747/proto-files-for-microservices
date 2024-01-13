@@ -6,6 +6,8 @@ option go_package = "./pb";
 
 import "google/protobuf/empty.proto";
 
+import "google.golang.org/grpc/health/grpc_health_v1/health.proto";
+
 message AddProductRequest {
     string name = 1;
     int32 price = 2;
@@ -43,4 +45,6 @@ service ProductService {
     rpc GetAllProducts(google.protobuf.Empty)returns(GetAllProductsResponce);
     rpc UpdateStock(UpdateStockRequest)returns(AddProductResponce);
     rpc GetArrayofProducts(ArrayofProductsRequest)returns(GetAllProductsResponce);
+        rpc Check(grpc.health.v1.HealthCheckRequest) returns (grpc.health.v1.HealthCheckResponse);
+    rpc Watch(grpc.health.v1.HealthCheckRequest) returns (stream grpc.health.v1.HealthCheckResponse);
 }
