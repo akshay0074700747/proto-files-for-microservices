@@ -25,6 +25,7 @@ const (
 	ProductService_GetAllProducts_FullMethodName     = "/product.ProductService/GetAllProducts"
 	ProductService_UpdateStock_FullMethodName        = "/product.ProductService/UpdateStock"
 	ProductService_GetArrayofProducts_FullMethodName = "/product.ProductService/GetArrayofProducts"
+	ProductService_Check_FullMethodName              = "/product.ProductService/Check"
 )
 
 // ProductServiceClient is the client API for ProductService service.
@@ -36,6 +37,7 @@ type ProductServiceClient interface {
 	GetAllProducts(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetAllProductsResponce, error)
 	UpdateStock(ctx context.Context, in *UpdateStockRequest, opts ...grpc.CallOption) (*AddProductResponce, error)
 	GetArrayofProducts(ctx context.Context, in *ArrayofProductsRequest, opts ...grpc.CallOption) (*GetAllProductsResponce, error)
+	Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
 
 type productServiceClient struct {
@@ -91,6 +93,15 @@ func (c *productServiceClient) GetArrayofProducts(ctx context.Context, in *Array
 	return out, nil
 }
 
+func (c *productServiceClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
+	out := new(HealthCheckResponse)
+	err := c.cc.Invoke(ctx, ProductService_Check_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProductServiceServer is the server API for ProductService service.
 // All implementations must embed UnimplementedProductServiceServer
 // for forward compatibility
@@ -100,6 +111,7 @@ type ProductServiceServer interface {
 	GetAllProducts(context.Context, *empty.Empty) (*GetAllProductsResponce, error)
 	UpdateStock(context.Context, *UpdateStockRequest) (*AddProductResponce, error)
 	GetArrayofProducts(context.Context, *ArrayofProductsRequest) (*GetAllProductsResponce, error)
+	Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	mustEmbedUnimplementedProductServiceServer()
 }
 
@@ -121,6 +133,9 @@ func (UnimplementedProductServiceServer) UpdateStock(context.Context, *UpdateSto
 }
 func (UnimplementedProductServiceServer) GetArrayofProducts(context.Context, *ArrayofProductsRequest) (*GetAllProductsResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetArrayofProducts not implemented")
+}
+func (UnimplementedProductServiceServer) Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
 }
 func (UnimplementedProductServiceServer) mustEmbedUnimplementedProductServiceServer() {}
 
@@ -225,6 +240,24 @@ func _ProductService_GetArrayofProducts_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProductService_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthCheckRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductServiceServer).Check(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProductService_Check_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductServiceServer).Check(ctx, req.(*HealthCheckRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProductService_ServiceDesc is the grpc.ServiceDesc for ProductService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -251,6 +284,10 @@ var ProductService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetArrayofProducts",
 			Handler:    _ProductService_GetArrayofProducts_Handler,
+		},
+		{
+			MethodName: "Check",
+			Handler:    _ProductService_Check_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

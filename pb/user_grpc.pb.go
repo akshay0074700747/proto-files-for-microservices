@@ -28,6 +28,7 @@ const (
 	UserService_GetAllUsersResponce_FullMethodName  = "/user.UserService/GetAllUsersResponce"
 	UserService_GetAllAdminsResponce_FullMethodName = "/user.UserService/GetAllAdminsResponce"
 	UserService_AddAdmin_FullMethodName             = "/user.UserService/AddAdmin"
+	UserService_Check_FullMethodName                = "/user.UserService/Check"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -42,6 +43,7 @@ type UserServiceClient interface {
 	GetAllUsersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error)
 	GetAllAdminsResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error)
 	AddAdmin(ctx context.Context, in *SignupUserRequest, opts ...grpc.CallOption) (*UserResponce, error)
+	Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
 
 type userServiceClient struct {
@@ -124,6 +126,15 @@ func (c *userServiceClient) AddAdmin(ctx context.Context, in *SignupUserRequest,
 	return out, nil
 }
 
+func (c *userServiceClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
+	out := new(HealthCheckResponse)
+	err := c.cc.Invoke(ctx, UserService_Check_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
@@ -136,6 +147,7 @@ type UserServiceServer interface {
 	GetAllUsersResponce(context.Context, *empty.Empty) (*AllUsersResponce, error)
 	GetAllAdminsResponce(context.Context, *empty.Empty) (*AllUsersResponce, error)
 	AddAdmin(context.Context, *SignupUserRequest) (*UserResponce, error)
+	Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -166,6 +178,9 @@ func (UnimplementedUserServiceServer) GetAllAdminsResponce(context.Context, *emp
 }
 func (UnimplementedUserServiceServer) AddAdmin(context.Context, *SignupUserRequest) (*UserResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddAdmin not implemented")
+}
+func (UnimplementedUserServiceServer) Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -324,6 +339,24 @@ func _UserService_AddAdmin_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthCheckRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).Check(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_Check_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).Check(ctx, req.(*HealthCheckRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -362,6 +395,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddAdmin",
 			Handler:    _UserService_AddAdmin_Handler,
+		},
+		{
+			MethodName: "Check",
+			Handler:    _UserService_Check_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

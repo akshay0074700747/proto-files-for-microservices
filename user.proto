@@ -37,6 +37,19 @@ message AllUsersResponce {
     repeated UserResponce users = 1;
 }
 
+message HealthCheckRequest {
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  ServingStatus status = 1;
+}
+
 service UserService {
     rpc SignupUser(SignupUserRequest)returns(UserResponce);
     rpc LoginUser(LoginRequest)returns(UserResponce);
@@ -46,4 +59,5 @@ service UserService {
     rpc GetAllUsersResponce(google.protobuf.Empty)returns(AllUsersResponce);
     rpc GetAllAdminsResponce(google.protobuf.Empty)returns(AllUsersResponce);
     rpc AddAdmin(SignupUserRequest)returns(UserResponce);
+    rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
 }

@@ -26,10 +26,24 @@ message GetWishlistResponce {
     repeated product.AddProductResponce products = 2;
 }
 
+message HealthCheckRequest {
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  ServingStatus status = 1;
+}
+
 service WishlistService {
     rpc CreateWishlist(WishlistRequest)returns(WishlistResponce);
     rpc GetWishlist(WishlistRequest)returns(GetWishlistResponce);
     rpc AddtoWishlist(AddtoWishlistRequest)returns(product.AddProductResponce);
     rpc DeleteWishlistItem(AddtoWishlistRequest)returns(GetWishlistResponce);
     rpc TruncateWishlist(WishlistRequest)returns(WishlistResponce);
+    rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
 }
