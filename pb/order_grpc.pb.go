@@ -23,7 +23,6 @@ const (
 	OrderService_AddOrder_FullMethodName             = "/order.OrderService/AddOrder"
 	OrderService_GetOrdersByUser_FullMethodName      = "/order.OrderService/GetOrdersByUser"
 	OrderService_GetAllOrdersResponce_FullMethodName = "/order.OrderService/GetAllOrdersResponce"
-	OrderService_Check_FullMethodName                = "/order.OrderService/Check"
 )
 
 // OrderServiceClient is the client API for OrderService service.
@@ -33,7 +32,6 @@ type OrderServiceClient interface {
 	AddOrder(ctx context.Context, in *AddOrderRequest, opts ...grpc.CallOption) (*AddOrderResponce, error)
 	GetOrdersByUser(ctx context.Context, in *GetOrdersByUserRequest, opts ...grpc.CallOption) (*GetOrdersWithoutUser, error)
 	GetAllOrdersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetOrdersByUserResponce, error)
-	Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
 
 type orderServiceClient struct {
@@ -71,15 +69,6 @@ func (c *orderServiceClient) GetAllOrdersResponce(ctx context.Context, in *empty
 	return out, nil
 }
 
-func (c *orderServiceClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
-	out := new(HealthCheckResponse)
-	err := c.cc.Invoke(ctx, OrderService_Check_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // OrderServiceServer is the server API for OrderService service.
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility
@@ -87,7 +76,6 @@ type OrderServiceServer interface {
 	AddOrder(context.Context, *AddOrderRequest) (*AddOrderResponce, error)
 	GetOrdersByUser(context.Context, *GetOrdersByUserRequest) (*GetOrdersWithoutUser, error)
 	GetAllOrdersResponce(context.Context, *empty.Empty) (*GetOrdersByUserResponce, error)
-	Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -103,9 +91,6 @@ func (UnimplementedOrderServiceServer) GetOrdersByUser(context.Context, *GetOrde
 }
 func (UnimplementedOrderServiceServer) GetAllOrdersResponce(context.Context, *empty.Empty) (*GetOrdersByUserResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllOrdersResponce not implemented")
-}
-func (UnimplementedOrderServiceServer) Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 
@@ -174,24 +159,6 @@ func _OrderService_GetAllOrdersResponce_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OrderService_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HealthCheckRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(OrderServiceServer).Check(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: OrderService_Check_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderServiceServer).Check(ctx, req.(*HealthCheckRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // OrderService_ServiceDesc is the grpc.ServiceDesc for OrderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -210,10 +177,6 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllOrdersResponce",
 			Handler:    _OrderService_GetAllOrdersResponce_Handler,
-		},
-		{
-			MethodName: "Check",
-			Handler:    _OrderService_Check_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

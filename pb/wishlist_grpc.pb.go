@@ -24,7 +24,6 @@ const (
 	WishlistService_AddtoWishlist_FullMethodName      = "/wishlist.WishlistService/AddtoWishlist"
 	WishlistService_DeleteWishlistItem_FullMethodName = "/wishlist.WishlistService/DeleteWishlistItem"
 	WishlistService_TruncateWishlist_FullMethodName   = "/wishlist.WishlistService/TruncateWishlist"
-	WishlistService_Check_FullMethodName              = "/wishlist.WishlistService/Check"
 )
 
 // WishlistServiceClient is the client API for WishlistService service.
@@ -36,7 +35,6 @@ type WishlistServiceClient interface {
 	AddtoWishlist(ctx context.Context, in *AddtoWishlistRequest, opts ...grpc.CallOption) (*AddProductResponce, error)
 	DeleteWishlistItem(ctx context.Context, in *AddtoWishlistRequest, opts ...grpc.CallOption) (*GetWishlistResponce, error)
 	TruncateWishlist(ctx context.Context, in *WishlistRequest, opts ...grpc.CallOption) (*WishlistResponce, error)
-	Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
 
 type wishlistServiceClient struct {
@@ -92,15 +90,6 @@ func (c *wishlistServiceClient) TruncateWishlist(ctx context.Context, in *Wishli
 	return out, nil
 }
 
-func (c *wishlistServiceClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
-	out := new(HealthCheckResponse)
-	err := c.cc.Invoke(ctx, WishlistService_Check_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // WishlistServiceServer is the server API for WishlistService service.
 // All implementations must embed UnimplementedWishlistServiceServer
 // for forward compatibility
@@ -110,7 +99,6 @@ type WishlistServiceServer interface {
 	AddtoWishlist(context.Context, *AddtoWishlistRequest) (*AddProductResponce, error)
 	DeleteWishlistItem(context.Context, *AddtoWishlistRequest) (*GetWishlistResponce, error)
 	TruncateWishlist(context.Context, *WishlistRequest) (*WishlistResponce, error)
-	Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	mustEmbedUnimplementedWishlistServiceServer()
 }
 
@@ -132,9 +120,6 @@ func (UnimplementedWishlistServiceServer) DeleteWishlistItem(context.Context, *A
 }
 func (UnimplementedWishlistServiceServer) TruncateWishlist(context.Context, *WishlistRequest) (*WishlistResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TruncateWishlist not implemented")
-}
-func (UnimplementedWishlistServiceServer) Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
 }
 func (UnimplementedWishlistServiceServer) mustEmbedUnimplementedWishlistServiceServer() {}
 
@@ -239,24 +224,6 @@ func _WishlistService_TruncateWishlist_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
-func _WishlistService_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HealthCheckRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WishlistServiceServer).Check(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: WishlistService_Check_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WishlistServiceServer).Check(ctx, req.(*HealthCheckRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // WishlistService_ServiceDesc is the grpc.ServiceDesc for WishlistService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -283,10 +250,6 @@ var WishlistService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TruncateWishlist",
 			Handler:    _WishlistService_TruncateWishlist_Handler,
-		},
-		{
-			MethodName: "Check",
-			Handler:    _WishlistService_Check_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

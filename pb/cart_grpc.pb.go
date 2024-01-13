@@ -26,7 +26,6 @@ const (
 	CartService_TruncateCart_FullMethodName    = "/cart.CartService/TruncateCart"
 	CartService_ChangeQty_FullMethodName       = "/cart.CartService/ChangeQty"
 	CartService_TrasferWishlist_FullMethodName = "/cart.CartService/TrasferWishlist"
-	CartService_Check_FullMethodName           = "/cart.CartService/Check"
 )
 
 // CartServiceClient is the client API for CartService service.
@@ -40,7 +39,6 @@ type CartServiceClient interface {
 	TruncateCart(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (*CartResponce, error)
 	ChangeQty(ctx context.Context, in *ChangeQtyRequest, opts ...grpc.CallOption) (*AddtoCartResponce, error)
 	TrasferWishlist(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (*GetCartResponce, error)
-	Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
 
 type cartServiceClient struct {
@@ -114,15 +112,6 @@ func (c *cartServiceClient) TrasferWishlist(ctx context.Context, in *CartRequest
 	return out, nil
 }
 
-func (c *cartServiceClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
-	out := new(HealthCheckResponse)
-	err := c.cc.Invoke(ctx, CartService_Check_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // CartServiceServer is the server API for CartService service.
 // All implementations must embed UnimplementedCartServiceServer
 // for forward compatibility
@@ -134,7 +123,6 @@ type CartServiceServer interface {
 	TruncateCart(context.Context, *CartRequest) (*CartResponce, error)
 	ChangeQty(context.Context, *ChangeQtyRequest) (*AddtoCartResponce, error)
 	TrasferWishlist(context.Context, *CartRequest) (*GetCartResponce, error)
-	Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	mustEmbedUnimplementedCartServiceServer()
 }
 
@@ -162,9 +150,6 @@ func (UnimplementedCartServiceServer) ChangeQty(context.Context, *ChangeQtyReque
 }
 func (UnimplementedCartServiceServer) TrasferWishlist(context.Context, *CartRequest) (*GetCartResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TrasferWishlist not implemented")
-}
-func (UnimplementedCartServiceServer) Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
 }
 func (UnimplementedCartServiceServer) mustEmbedUnimplementedCartServiceServer() {}
 
@@ -305,24 +290,6 @@ func _CartService_TrasferWishlist_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CartService_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HealthCheckRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CartServiceServer).Check(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: CartService_Check_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CartServiceServer).Check(ctx, req.(*HealthCheckRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // CartService_ServiceDesc is the grpc.ServiceDesc for CartService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -357,10 +324,6 @@ var CartService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TrasferWishlist",
 			Handler:    _CartService_TrasferWishlist_Handler,
-		},
-		{
-			MethodName: "Check",
-			Handler:    _CartService_Check_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
