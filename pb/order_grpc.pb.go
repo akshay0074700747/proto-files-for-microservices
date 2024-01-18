@@ -30,8 +30,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type OrderServiceClient interface {
 	AddOrder(ctx context.Context, in *AddOrderRequest, opts ...grpc.CallOption) (*AddOrderResponce, error)
-	GetOrdersByUser(ctx context.Context, in *GetOrdersByUserRequest, opts ...grpc.CallOption) (*GetOrdersWithoutUser, error)
-	GetAllOrdersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetOrdersByUserResponce, error)
+	GetOrdersByUser(ctx context.Context, in *GetOrdersByUserRequest, opts ...grpc.CallOption) (OrderService_GetOrdersByUserClient, error)
+	GetAllOrdersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (OrderService_GetAllOrdersResponceClient, error)
 }
 
 type orderServiceClient struct {
@@ -51,22 +51,68 @@ func (c *orderServiceClient) AddOrder(ctx context.Context, in *AddOrderRequest, 
 	return out, nil
 }
 
-func (c *orderServiceClient) GetOrdersByUser(ctx context.Context, in *GetOrdersByUserRequest, opts ...grpc.CallOption) (*GetOrdersWithoutUser, error) {
-	out := new(GetOrdersWithoutUser)
-	err := c.cc.Invoke(ctx, OrderService_GetOrdersByUser_FullMethodName, in, out, opts...)
+func (c *orderServiceClient) GetOrdersByUser(ctx context.Context, in *GetOrdersByUserRequest, opts ...grpc.CallOption) (OrderService_GetOrdersByUserClient, error) {
+	stream, err := c.cc.NewStream(ctx, &OrderService_ServiceDesc.Streams[0], OrderService_GetOrdersByUser_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &orderServiceGetOrdersByUserClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
 }
 
-func (c *orderServiceClient) GetAllOrdersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetOrdersByUserResponce, error) {
-	out := new(GetOrdersByUserResponce)
-	err := c.cc.Invoke(ctx, OrderService_GetAllOrdersResponce_FullMethodName, in, out, opts...)
+type OrderService_GetOrdersByUserClient interface {
+	Recv() (*OrdersOnly, error)
+	grpc.ClientStream
+}
+
+type orderServiceGetOrdersByUserClient struct {
+	grpc.ClientStream
+}
+
+func (x *orderServiceGetOrdersByUserClient) Recv() (*OrdersOnly, error) {
+	m := new(OrdersOnly)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *orderServiceClient) GetAllOrdersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (OrderService_GetAllOrdersResponceClient, error) {
+	stream, err := c.cc.NewStream(ctx, &OrderService_ServiceDesc.Streams[1], OrderService_GetAllOrdersResponce_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &orderServiceGetAllOrdersResponceClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type OrderService_GetAllOrdersResponceClient interface {
+	Recv() (*AddOrderResponce, error)
+	grpc.ClientStream
+}
+
+type orderServiceGetAllOrdersResponceClient struct {
+	grpc.ClientStream
+}
+
+func (x *orderServiceGetAllOrdersResponceClient) Recv() (*AddOrderResponce, error) {
+	m := new(AddOrderResponce)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // OrderServiceServer is the server API for OrderService service.
@@ -74,8 +120,8 @@ func (c *orderServiceClient) GetAllOrdersResponce(ctx context.Context, in *empty
 // for forward compatibility
 type OrderServiceServer interface {
 	AddOrder(context.Context, *AddOrderRequest) (*AddOrderResponce, error)
-	GetOrdersByUser(context.Context, *GetOrdersByUserRequest) (*GetOrdersWithoutUser, error)
-	GetAllOrdersResponce(context.Context, *empty.Empty) (*GetOrdersByUserResponce, error)
+	GetOrdersByUser(*GetOrdersByUserRequest, OrderService_GetOrdersByUserServer) error
+	GetAllOrdersResponce(*empty.Empty, OrderService_GetAllOrdersResponceServer) error
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -86,11 +132,11 @@ type UnimplementedOrderServiceServer struct {
 func (UnimplementedOrderServiceServer) AddOrder(context.Context, *AddOrderRequest) (*AddOrderResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddOrder not implemented")
 }
-func (UnimplementedOrderServiceServer) GetOrdersByUser(context.Context, *GetOrdersByUserRequest) (*GetOrdersWithoutUser, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetOrdersByUser not implemented")
+func (UnimplementedOrderServiceServer) GetOrdersByUser(*GetOrdersByUserRequest, OrderService_GetOrdersByUserServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetOrdersByUser not implemented")
 }
-func (UnimplementedOrderServiceServer) GetAllOrdersResponce(context.Context, *empty.Empty) (*GetOrdersByUserResponce, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAllOrdersResponce not implemented")
+func (UnimplementedOrderServiceServer) GetAllOrdersResponce(*empty.Empty, OrderService_GetAllOrdersResponceServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetAllOrdersResponce not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 
@@ -123,40 +169,46 @@ func _OrderService_AddOrder_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _OrderService_GetOrdersByUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetOrdersByUserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _OrderService_GetOrdersByUser_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetOrdersByUserRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(OrderServiceServer).GetOrdersByUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: OrderService_GetOrdersByUser_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderServiceServer).GetOrdersByUser(ctx, req.(*GetOrdersByUserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(OrderServiceServer).GetOrdersByUser(m, &orderServiceGetOrdersByUserServer{stream})
 }
 
-func _OrderService_GetAllOrdersResponce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
+type OrderService_GetOrdersByUserServer interface {
+	Send(*OrdersOnly) error
+	grpc.ServerStream
+}
+
+type orderServiceGetOrdersByUserServer struct {
+	grpc.ServerStream
+}
+
+func (x *orderServiceGetOrdersByUserServer) Send(m *OrdersOnly) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _OrderService_GetAllOrdersResponce_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(empty.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(OrderServiceServer).GetAllOrdersResponce(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: OrderService_GetAllOrdersResponce_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(OrderServiceServer).GetAllOrdersResponce(ctx, req.(*empty.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(OrderServiceServer).GetAllOrdersResponce(m, &orderServiceGetAllOrdersResponceServer{stream})
+}
+
+type OrderService_GetAllOrdersResponceServer interface {
+	Send(*AddOrderResponce) error
+	grpc.ServerStream
+}
+
+type orderServiceGetAllOrdersResponceServer struct {
+	grpc.ServerStream
+}
+
+func (x *orderServiceGetAllOrdersResponceServer) Send(m *AddOrderResponce) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 // OrderService_ServiceDesc is the grpc.ServiceDesc for OrderService service.
@@ -170,15 +222,18 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "AddOrder",
 			Handler:    _OrderService_AddOrder_Handler,
 		},
+	},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "GetOrdersByUser",
-			Handler:    _OrderService_GetOrdersByUser_Handler,
+			StreamName:    "GetOrdersByUser",
+			Handler:       _OrderService_GetOrdersByUser_Handler,
+			ServerStreams: true,
 		},
 		{
-			MethodName: "GetAllOrdersResponce",
-			Handler:    _OrderService_GetAllOrdersResponce_Handler,
+			StreamName:    "GetAllOrdersResponce",
+			Handler:       _OrderService_GetAllOrdersResponce_Handler,
+			ServerStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "order.proto",
 }

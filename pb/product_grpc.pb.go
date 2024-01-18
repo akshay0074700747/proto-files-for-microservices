@@ -33,9 +33,9 @@ const (
 type ProductServiceClient interface {
 	AddProducts(ctx context.Context, in *AddProductRequest, opts ...grpc.CallOption) (*AddProductResponce, error)
 	GetProduct(ctx context.Context, in *GetProductByID, opts ...grpc.CallOption) (*AddProductResponce, error)
-	GetAllProducts(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetAllProductsResponce, error)
+	GetAllProducts(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (ProductService_GetAllProductsClient, error)
 	UpdateStock(ctx context.Context, in *UpdateStockRequest, opts ...grpc.CallOption) (*AddProductResponce, error)
-	GetArrayofProducts(ctx context.Context, in *ArrayofProductsRequest, opts ...grpc.CallOption) (*GetAllProductsResponce, error)
+	GetArrayofProducts(ctx context.Context, opts ...grpc.CallOption) (ProductService_GetArrayofProductsClient, error)
 }
 
 type productServiceClient struct {
@@ -64,13 +64,36 @@ func (c *productServiceClient) GetProduct(ctx context.Context, in *GetProductByI
 	return out, nil
 }
 
-func (c *productServiceClient) GetAllProducts(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetAllProductsResponce, error) {
-	out := new(GetAllProductsResponce)
-	err := c.cc.Invoke(ctx, ProductService_GetAllProducts_FullMethodName, in, out, opts...)
+func (c *productServiceClient) GetAllProducts(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (ProductService_GetAllProductsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ProductService_ServiceDesc.Streams[0], ProductService_GetAllProducts_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &productServiceGetAllProductsClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ProductService_GetAllProductsClient interface {
+	Recv() (*AddProductResponce, error)
+	grpc.ClientStream
+}
+
+type productServiceGetAllProductsClient struct {
+	grpc.ClientStream
+}
+
+func (x *productServiceGetAllProductsClient) Recv() (*AddProductResponce, error) {
+	m := new(AddProductResponce)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *productServiceClient) UpdateStock(ctx context.Context, in *UpdateStockRequest, opts ...grpc.CallOption) (*AddProductResponce, error) {
@@ -82,13 +105,35 @@ func (c *productServiceClient) UpdateStock(ctx context.Context, in *UpdateStockR
 	return out, nil
 }
 
-func (c *productServiceClient) GetArrayofProducts(ctx context.Context, in *ArrayofProductsRequest, opts ...grpc.CallOption) (*GetAllProductsResponce, error) {
-	out := new(GetAllProductsResponce)
-	err := c.cc.Invoke(ctx, ProductService_GetArrayofProducts_FullMethodName, in, out, opts...)
+func (c *productServiceClient) GetArrayofProducts(ctx context.Context, opts ...grpc.CallOption) (ProductService_GetArrayofProductsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ProductService_ServiceDesc.Streams[1], ProductService_GetArrayofProducts_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &productServiceGetArrayofProductsClient{stream}
+	return x, nil
+}
+
+type ProductService_GetArrayofProductsClient interface {
+	Send(*GetProductByID) error
+	Recv() (*AddProductResponce, error)
+	grpc.ClientStream
+}
+
+type productServiceGetArrayofProductsClient struct {
+	grpc.ClientStream
+}
+
+func (x *productServiceGetArrayofProductsClient) Send(m *GetProductByID) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *productServiceGetArrayofProductsClient) Recv() (*AddProductResponce, error) {
+	m := new(AddProductResponce)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // ProductServiceServer is the server API for ProductService service.
@@ -97,9 +142,9 @@ func (c *productServiceClient) GetArrayofProducts(ctx context.Context, in *Array
 type ProductServiceServer interface {
 	AddProducts(context.Context, *AddProductRequest) (*AddProductResponce, error)
 	GetProduct(context.Context, *GetProductByID) (*AddProductResponce, error)
-	GetAllProducts(context.Context, *empty.Empty) (*GetAllProductsResponce, error)
+	GetAllProducts(*empty.Empty, ProductService_GetAllProductsServer) error
 	UpdateStock(context.Context, *UpdateStockRequest) (*AddProductResponce, error)
-	GetArrayofProducts(context.Context, *ArrayofProductsRequest) (*GetAllProductsResponce, error)
+	GetArrayofProducts(ProductService_GetArrayofProductsServer) error
 	mustEmbedUnimplementedProductServiceServer()
 }
 
@@ -113,14 +158,14 @@ func (UnimplementedProductServiceServer) AddProducts(context.Context, *AddProduc
 func (UnimplementedProductServiceServer) GetProduct(context.Context, *GetProductByID) (*AddProductResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProduct not implemented")
 }
-func (UnimplementedProductServiceServer) GetAllProducts(context.Context, *empty.Empty) (*GetAllProductsResponce, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAllProducts not implemented")
+func (UnimplementedProductServiceServer) GetAllProducts(*empty.Empty, ProductService_GetAllProductsServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetAllProducts not implemented")
 }
 func (UnimplementedProductServiceServer) UpdateStock(context.Context, *UpdateStockRequest) (*AddProductResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateStock not implemented")
 }
-func (UnimplementedProductServiceServer) GetArrayofProducts(context.Context, *ArrayofProductsRequest) (*GetAllProductsResponce, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetArrayofProducts not implemented")
+func (UnimplementedProductServiceServer) GetArrayofProducts(ProductService_GetArrayofProductsServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetArrayofProducts not implemented")
 }
 func (UnimplementedProductServiceServer) mustEmbedUnimplementedProductServiceServer() {}
 
@@ -171,22 +216,25 @@ func _ProductService_GetProduct_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProductService_GetAllProducts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
+func _ProductService_GetAllProducts_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(empty.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(ProductServiceServer).GetAllProducts(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProductService_GetAllProducts_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductServiceServer).GetAllProducts(ctx, req.(*empty.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(ProductServiceServer).GetAllProducts(m, &productServiceGetAllProductsServer{stream})
+}
+
+type ProductService_GetAllProductsServer interface {
+	Send(*AddProductResponce) error
+	grpc.ServerStream
+}
+
+type productServiceGetAllProductsServer struct {
+	grpc.ServerStream
+}
+
+func (x *productServiceGetAllProductsServer) Send(m *AddProductResponce) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _ProductService_UpdateStock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -207,22 +255,30 @@ func _ProductService_UpdateStock_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProductService_GetArrayofProducts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ArrayofProductsRequest)
-	if err := dec(in); err != nil {
+func _ProductService_GetArrayofProducts_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ProductServiceServer).GetArrayofProducts(&productServiceGetArrayofProductsServer{stream})
+}
+
+type ProductService_GetArrayofProductsServer interface {
+	Send(*AddProductResponce) error
+	Recv() (*GetProductByID, error)
+	grpc.ServerStream
+}
+
+type productServiceGetArrayofProductsServer struct {
+	grpc.ServerStream
+}
+
+func (x *productServiceGetArrayofProductsServer) Send(m *AddProductResponce) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *productServiceGetArrayofProductsServer) Recv() (*GetProductByID, error) {
+	m := new(GetProductByID)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(ProductServiceServer).GetArrayofProducts(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProductService_GetArrayofProducts_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductServiceServer).GetArrayofProducts(ctx, req.(*ArrayofProductsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
 // ProductService_ServiceDesc is the grpc.ServiceDesc for ProductService service.
@@ -241,18 +297,22 @@ var ProductService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ProductService_GetProduct_Handler,
 		},
 		{
-			MethodName: "GetAllProducts",
-			Handler:    _ProductService_GetAllProducts_Handler,
-		},
-		{
 			MethodName: "UpdateStock",
 			Handler:    _ProductService_UpdateStock_Handler,
 		},
+	},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "GetArrayofProducts",
-			Handler:    _ProductService_GetArrayofProducts_Handler,
+			StreamName:    "GetAllProducts",
+			Handler:       _ProductService_GetAllProducts_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetArrayofProducts",
+			Handler:       _ProductService_GetArrayofProducts_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "product.proto",
 }

@@ -39,8 +39,8 @@ type UserServiceClient interface {
 	GetUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponce, error)
 	GetAdmin(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponce, error)
 	GetSuAdmin(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponce, error)
-	GetAllUsersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error)
-	GetAllAdminsResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error)
+	GetAllUsersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (UserService_GetAllUsersResponceClient, error)
+	GetAllAdminsResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (UserService_GetAllAdminsResponceClient, error)
 	AddAdmin(ctx context.Context, in *SignupUserRequest, opts ...grpc.CallOption) (*UserResponce, error)
 }
 
@@ -97,22 +97,68 @@ func (c *userServiceClient) GetSuAdmin(ctx context.Context, in *UserRequest, opt
 	return out, nil
 }
 
-func (c *userServiceClient) GetAllUsersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error) {
-	out := new(AllUsersResponce)
-	err := c.cc.Invoke(ctx, UserService_GetAllUsersResponce_FullMethodName, in, out, opts...)
+func (c *userServiceClient) GetAllUsersResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (UserService_GetAllUsersResponceClient, error) {
+	stream, err := c.cc.NewStream(ctx, &UserService_ServiceDesc.Streams[0], UserService_GetAllUsersResponce_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &userServiceGetAllUsersResponceClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
 }
 
-func (c *userServiceClient) GetAllAdminsResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*AllUsersResponce, error) {
-	out := new(AllUsersResponce)
-	err := c.cc.Invoke(ctx, UserService_GetAllAdminsResponce_FullMethodName, in, out, opts...)
+type UserService_GetAllUsersResponceClient interface {
+	Recv() (*UserResponce, error)
+	grpc.ClientStream
+}
+
+type userServiceGetAllUsersResponceClient struct {
+	grpc.ClientStream
+}
+
+func (x *userServiceGetAllUsersResponceClient) Recv() (*UserResponce, error) {
+	m := new(UserResponce)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *userServiceClient) GetAllAdminsResponce(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (UserService_GetAllAdminsResponceClient, error) {
+	stream, err := c.cc.NewStream(ctx, &UserService_ServiceDesc.Streams[1], UserService_GetAllAdminsResponce_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &userServiceGetAllAdminsResponceClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type UserService_GetAllAdminsResponceClient interface {
+	Recv() (*UserResponce, error)
+	grpc.ClientStream
+}
+
+type userServiceGetAllAdminsResponceClient struct {
+	grpc.ClientStream
+}
+
+func (x *userServiceGetAllAdminsResponceClient) Recv() (*UserResponce, error) {
+	m := new(UserResponce)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *userServiceClient) AddAdmin(ctx context.Context, in *SignupUserRequest, opts ...grpc.CallOption) (*UserResponce, error) {
@@ -133,8 +179,8 @@ type UserServiceServer interface {
 	GetUser(context.Context, *UserRequest) (*UserResponce, error)
 	GetAdmin(context.Context, *UserRequest) (*UserResponce, error)
 	GetSuAdmin(context.Context, *UserRequest) (*UserResponce, error)
-	GetAllUsersResponce(context.Context, *empty.Empty) (*AllUsersResponce, error)
-	GetAllAdminsResponce(context.Context, *empty.Empty) (*AllUsersResponce, error)
+	GetAllUsersResponce(*empty.Empty, UserService_GetAllUsersResponceServer) error
+	GetAllAdminsResponce(*empty.Empty, UserService_GetAllAdminsResponceServer) error
 	AddAdmin(context.Context, *SignupUserRequest) (*UserResponce, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -158,11 +204,11 @@ func (UnimplementedUserServiceServer) GetAdmin(context.Context, *UserRequest) (*
 func (UnimplementedUserServiceServer) GetSuAdmin(context.Context, *UserRequest) (*UserResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSuAdmin not implemented")
 }
-func (UnimplementedUserServiceServer) GetAllUsersResponce(context.Context, *empty.Empty) (*AllUsersResponce, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAllUsersResponce not implemented")
+func (UnimplementedUserServiceServer) GetAllUsersResponce(*empty.Empty, UserService_GetAllUsersResponceServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetAllUsersResponce not implemented")
 }
-func (UnimplementedUserServiceServer) GetAllAdminsResponce(context.Context, *empty.Empty) (*AllUsersResponce, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAllAdminsResponce not implemented")
+func (UnimplementedUserServiceServer) GetAllAdminsResponce(*empty.Empty, UserService_GetAllAdminsResponceServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetAllAdminsResponce not implemented")
 }
 func (UnimplementedUserServiceServer) AddAdmin(context.Context, *SignupUserRequest) (*UserResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddAdmin not implemented")
@@ -270,40 +316,46 @@ func _UserService_GetSuAdmin_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_GetAllUsersResponce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
+func _UserService_GetAllUsersResponce_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(empty.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).GetAllUsersResponce(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserService_GetAllUsersResponce_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetAllUsersResponce(ctx, req.(*empty.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(UserServiceServer).GetAllUsersResponce(m, &userServiceGetAllUsersResponceServer{stream})
 }
 
-func _UserService_GetAllAdminsResponce_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
+type UserService_GetAllUsersResponceServer interface {
+	Send(*UserResponce) error
+	grpc.ServerStream
+}
+
+type userServiceGetAllUsersResponceServer struct {
+	grpc.ServerStream
+}
+
+func (x *userServiceGetAllUsersResponceServer) Send(m *UserResponce) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _UserService_GetAllAdminsResponce_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(empty.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).GetAllAdminsResponce(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserService_GetAllAdminsResponce_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetAllAdminsResponce(ctx, req.(*empty.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(UserServiceServer).GetAllAdminsResponce(m, &userServiceGetAllAdminsResponceServer{stream})
+}
+
+type UserService_GetAllAdminsResponceServer interface {
+	Send(*UserResponce) error
+	grpc.ServerStream
+}
+
+type userServiceGetAllAdminsResponceServer struct {
+	grpc.ServerStream
+}
+
+func (x *userServiceGetAllAdminsResponceServer) Send(m *UserResponce) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _UserService_AddAdmin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -352,18 +404,21 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_GetSuAdmin_Handler,
 		},
 		{
-			MethodName: "GetAllUsersResponce",
-			Handler:    _UserService_GetAllUsersResponce_Handler,
-		},
-		{
-			MethodName: "GetAllAdminsResponce",
-			Handler:    _UserService_GetAllAdminsResponce_Handler,
-		},
-		{
 			MethodName: "AddAdmin",
 			Handler:    _UserService_AddAdmin_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetAllUsersResponce",
+			Handler:       _UserService_GetAllUsersResponce_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetAllAdminsResponce",
+			Handler:       _UserService_GetAllAdminsResponce_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "user.proto",
 }

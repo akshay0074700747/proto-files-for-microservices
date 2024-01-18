@@ -33,12 +33,12 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CartServiceClient interface {
 	CreateCart(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (*CartResponce, error)
-	GetCart(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (*GetCartResponce, error)
+	GetCart(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (CartService_GetCartClient, error)
 	AddtoCart(ctx context.Context, in *AddtoCartRequest, opts ...grpc.CallOption) (*AddtoCartResponce, error)
-	DeleteCartItem(ctx context.Context, in *AddtoCartRequest, opts ...grpc.CallOption) (*GetCartResponce, error)
+	DeleteCartItem(ctx context.Context, in *AddtoCartRequest, opts ...grpc.CallOption) (CartService_DeleteCartItemClient, error)
 	TruncateCart(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (*CartResponce, error)
 	ChangeQty(ctx context.Context, in *ChangeQtyRequest, opts ...grpc.CallOption) (*AddtoCartResponce, error)
-	TrasferWishlist(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (*GetCartResponce, error)
+	TrasferWishlist(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (CartService_TrasferWishlistClient, error)
 }
 
 type cartServiceClient struct {
@@ -58,13 +58,36 @@ func (c *cartServiceClient) CreateCart(ctx context.Context, in *CartRequest, opt
 	return out, nil
 }
 
-func (c *cartServiceClient) GetCart(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (*GetCartResponce, error) {
-	out := new(GetCartResponce)
-	err := c.cc.Invoke(ctx, CartService_GetCart_FullMethodName, in, out, opts...)
+func (c *cartServiceClient) GetCart(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (CartService_GetCartClient, error) {
+	stream, err := c.cc.NewStream(ctx, &CartService_ServiceDesc.Streams[0], CartService_GetCart_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &cartServiceGetCartClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type CartService_GetCartClient interface {
+	Recv() (*AddtoCartResponce, error)
+	grpc.ClientStream
+}
+
+type cartServiceGetCartClient struct {
+	grpc.ClientStream
+}
+
+func (x *cartServiceGetCartClient) Recv() (*AddtoCartResponce, error) {
+	m := new(AddtoCartResponce)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *cartServiceClient) AddtoCart(ctx context.Context, in *AddtoCartRequest, opts ...grpc.CallOption) (*AddtoCartResponce, error) {
@@ -76,13 +99,36 @@ func (c *cartServiceClient) AddtoCart(ctx context.Context, in *AddtoCartRequest,
 	return out, nil
 }
 
-func (c *cartServiceClient) DeleteCartItem(ctx context.Context, in *AddtoCartRequest, opts ...grpc.CallOption) (*GetCartResponce, error) {
-	out := new(GetCartResponce)
-	err := c.cc.Invoke(ctx, CartService_DeleteCartItem_FullMethodName, in, out, opts...)
+func (c *cartServiceClient) DeleteCartItem(ctx context.Context, in *AddtoCartRequest, opts ...grpc.CallOption) (CartService_DeleteCartItemClient, error) {
+	stream, err := c.cc.NewStream(ctx, &CartService_ServiceDesc.Streams[1], CartService_DeleteCartItem_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &cartServiceDeleteCartItemClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type CartService_DeleteCartItemClient interface {
+	Recv() (*AddtoCartResponce, error)
+	grpc.ClientStream
+}
+
+type cartServiceDeleteCartItemClient struct {
+	grpc.ClientStream
+}
+
+func (x *cartServiceDeleteCartItemClient) Recv() (*AddtoCartResponce, error) {
+	m := new(AddtoCartResponce)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *cartServiceClient) TruncateCart(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (*CartResponce, error) {
@@ -103,13 +149,36 @@ func (c *cartServiceClient) ChangeQty(ctx context.Context, in *ChangeQtyRequest,
 	return out, nil
 }
 
-func (c *cartServiceClient) TrasferWishlist(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (*GetCartResponce, error) {
-	out := new(GetCartResponce)
-	err := c.cc.Invoke(ctx, CartService_TrasferWishlist_FullMethodName, in, out, opts...)
+func (c *cartServiceClient) TrasferWishlist(ctx context.Context, in *CartRequest, opts ...grpc.CallOption) (CartService_TrasferWishlistClient, error) {
+	stream, err := c.cc.NewStream(ctx, &CartService_ServiceDesc.Streams[2], CartService_TrasferWishlist_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &cartServiceTrasferWishlistClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type CartService_TrasferWishlistClient interface {
+	Recv() (*AddtoCartResponce, error)
+	grpc.ClientStream
+}
+
+type cartServiceTrasferWishlistClient struct {
+	grpc.ClientStream
+}
+
+func (x *cartServiceTrasferWishlistClient) Recv() (*AddtoCartResponce, error) {
+	m := new(AddtoCartResponce)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // CartServiceServer is the server API for CartService service.
@@ -117,12 +186,12 @@ func (c *cartServiceClient) TrasferWishlist(ctx context.Context, in *CartRequest
 // for forward compatibility
 type CartServiceServer interface {
 	CreateCart(context.Context, *CartRequest) (*CartResponce, error)
-	GetCart(context.Context, *CartRequest) (*GetCartResponce, error)
+	GetCart(*CartRequest, CartService_GetCartServer) error
 	AddtoCart(context.Context, *AddtoCartRequest) (*AddtoCartResponce, error)
-	DeleteCartItem(context.Context, *AddtoCartRequest) (*GetCartResponce, error)
+	DeleteCartItem(*AddtoCartRequest, CartService_DeleteCartItemServer) error
 	TruncateCart(context.Context, *CartRequest) (*CartResponce, error)
 	ChangeQty(context.Context, *ChangeQtyRequest) (*AddtoCartResponce, error)
-	TrasferWishlist(context.Context, *CartRequest) (*GetCartResponce, error)
+	TrasferWishlist(*CartRequest, CartService_TrasferWishlistServer) error
 	mustEmbedUnimplementedCartServiceServer()
 }
 
@@ -133,14 +202,14 @@ type UnimplementedCartServiceServer struct {
 func (UnimplementedCartServiceServer) CreateCart(context.Context, *CartRequest) (*CartResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCart not implemented")
 }
-func (UnimplementedCartServiceServer) GetCart(context.Context, *CartRequest) (*GetCartResponce, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCart not implemented")
+func (UnimplementedCartServiceServer) GetCart(*CartRequest, CartService_GetCartServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetCart not implemented")
 }
 func (UnimplementedCartServiceServer) AddtoCart(context.Context, *AddtoCartRequest) (*AddtoCartResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddtoCart not implemented")
 }
-func (UnimplementedCartServiceServer) DeleteCartItem(context.Context, *AddtoCartRequest) (*GetCartResponce, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteCartItem not implemented")
+func (UnimplementedCartServiceServer) DeleteCartItem(*AddtoCartRequest, CartService_DeleteCartItemServer) error {
+	return status.Errorf(codes.Unimplemented, "method DeleteCartItem not implemented")
 }
 func (UnimplementedCartServiceServer) TruncateCart(context.Context, *CartRequest) (*CartResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TruncateCart not implemented")
@@ -148,8 +217,8 @@ func (UnimplementedCartServiceServer) TruncateCart(context.Context, *CartRequest
 func (UnimplementedCartServiceServer) ChangeQty(context.Context, *ChangeQtyRequest) (*AddtoCartResponce, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangeQty not implemented")
 }
-func (UnimplementedCartServiceServer) TrasferWishlist(context.Context, *CartRequest) (*GetCartResponce, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method TrasferWishlist not implemented")
+func (UnimplementedCartServiceServer) TrasferWishlist(*CartRequest, CartService_TrasferWishlistServer) error {
+	return status.Errorf(codes.Unimplemented, "method TrasferWishlist not implemented")
 }
 func (UnimplementedCartServiceServer) mustEmbedUnimplementedCartServiceServer() {}
 
@@ -182,22 +251,25 @@ func _CartService_CreateCart_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CartService_GetCart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CartRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _CartService_GetCart_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(CartRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(CartServiceServer).GetCart(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: CartService_GetCart_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CartServiceServer).GetCart(ctx, req.(*CartRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(CartServiceServer).GetCart(m, &cartServiceGetCartServer{stream})
+}
+
+type CartService_GetCartServer interface {
+	Send(*AddtoCartResponce) error
+	grpc.ServerStream
+}
+
+type cartServiceGetCartServer struct {
+	grpc.ServerStream
+}
+
+func (x *cartServiceGetCartServer) Send(m *AddtoCartResponce) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _CartService_AddtoCart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -218,22 +290,25 @@ func _CartService_AddtoCart_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CartService_DeleteCartItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddtoCartRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _CartService_DeleteCartItem_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(AddtoCartRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(CartServiceServer).DeleteCartItem(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: CartService_DeleteCartItem_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CartServiceServer).DeleteCartItem(ctx, req.(*AddtoCartRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(CartServiceServer).DeleteCartItem(m, &cartServiceDeleteCartItemServer{stream})
+}
+
+type CartService_DeleteCartItemServer interface {
+	Send(*AddtoCartResponce) error
+	grpc.ServerStream
+}
+
+type cartServiceDeleteCartItemServer struct {
+	grpc.ServerStream
+}
+
+func (x *cartServiceDeleteCartItemServer) Send(m *AddtoCartResponce) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _CartService_TruncateCart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -272,22 +347,25 @@ func _CartService_ChangeQty_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CartService_TrasferWishlist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CartRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _CartService_TrasferWishlist_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(CartRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(CartServiceServer).TrasferWishlist(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: CartService_TrasferWishlist_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CartServiceServer).TrasferWishlist(ctx, req.(*CartRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(CartServiceServer).TrasferWishlist(m, &cartServiceTrasferWishlistServer{stream})
+}
+
+type CartService_TrasferWishlistServer interface {
+	Send(*AddtoCartResponce) error
+	grpc.ServerStream
+}
+
+type cartServiceTrasferWishlistServer struct {
+	grpc.ServerStream
+}
+
+func (x *cartServiceTrasferWishlistServer) Send(m *AddtoCartResponce) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 // CartService_ServiceDesc is the grpc.ServiceDesc for CartService service.
@@ -302,16 +380,8 @@ var CartService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _CartService_CreateCart_Handler,
 		},
 		{
-			MethodName: "GetCart",
-			Handler:    _CartService_GetCart_Handler,
-		},
-		{
 			MethodName: "AddtoCart",
 			Handler:    _CartService_AddtoCart_Handler,
-		},
-		{
-			MethodName: "DeleteCartItem",
-			Handler:    _CartService_DeleteCartItem_Handler,
 		},
 		{
 			MethodName: "TruncateCart",
@@ -321,11 +391,23 @@ var CartService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "ChangeQty",
 			Handler:    _CartService_ChangeQty_Handler,
 		},
+	},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "TrasferWishlist",
-			Handler:    _CartService_TrasferWishlist_Handler,
+			StreamName:    "GetCart",
+			Handler:       _CartService_GetCart_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "DeleteCartItem",
+			Handler:       _CartService_DeleteCartItem_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "TrasferWishlist",
+			Handler:       _CartService_TrasferWishlist_Handler,
+			ServerStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "cart.proto",
 }

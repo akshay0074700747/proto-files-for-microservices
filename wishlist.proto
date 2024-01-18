@@ -6,8 +6,6 @@ option go_package = "./pb";
 
 import "product.proto";
 
-import "google.golang.org/grpc/health/grpc_health_v1/health.proto";
-
 message WishlistRequest {
     uint32 user_id = 1;
 }
@@ -23,17 +21,10 @@ message AddtoWishlistRequest {
     uint32 product_id = 2;
 }
 
-message GetWishlistResponce {
-    uint32 wishlist_id = 1;
-    repeated product.AddProductResponce products = 2;
-}
-
 service WishlistService {
     rpc CreateWishlist(WishlistRequest)returns(WishlistResponce);
-    rpc GetWishlist(WishlistRequest)returns(GetWishlistResponce);
+    rpc GetWishlist(WishlistRequest)returns(stream product.AddProductResponce) {}
     rpc AddtoWishlist(AddtoWishlistRequest)returns(product.AddProductResponce);
-    rpc DeleteWishlistItem(AddtoWishlistRequest)returns(GetWishlistResponce);
+    rpc DeleteWishlistItem(AddtoWishlistRequest)returns(stream product.AddProductResponce);
     rpc TruncateWishlist(WishlistRequest)returns(WishlistResponce);
-        rpc Check(grpc.health.v1.HealthCheckRequest) returns (grpc.health.v1.HealthCheckResponse);
-    rpc Watch(grpc.health.v1.HealthCheckRequest) returns (stream grpc.health.v1.HealthCheckResponse);
 }
