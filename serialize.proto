@@ -15,3 +15,8 @@ message Name {
 message Id {
     uint32 id = 1;
 }
+
+message Email {
+    string message = 1;
+    string reciever = 2;
+}
