@@ -12,7 +12,12 @@ import "product.proto";
 
 message AddOrderRequest {
     uint32 user_id = 1;
-    repeated int32 productIDs = 2;
+    repeated ProductwithQuantity products = 2;
+}
+
+message ProductwithQuantity {
+    uint32 id = 1;
+    uint32 quantity =2;
 }
 
 message AddOrderResponce {
